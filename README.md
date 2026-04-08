@@ -400,6 +400,67 @@ export PYTHONPATH=$(pwd):${PYTHONPATH}
 - Versionar herramientas y contratos de entrada/salida.
 - Usar estado persistente para continuidad de conversaciones largas.
 
+## Metodologia ReWOO (Planner + Worker + Solver)
+
+ReWOO separa el flujo en tres componentes para mejorar claridad y eficiencia:
+
+1. Planner: divide una tarea compleja en subpreguntas.
+2. Worker: recupera evidencia externa (por ejemplo, via busqueda web).
+3. Solver: sintetiza resultados en una respuesta final coherente.
+
+Esta separacion reduce repeticion de instrucciones y facilita razonamiento
+paso a paso con uso de herramientas.
+
+### Implementacion ReWOO incluida
+
+Se agrego una implementacion ejecutable en:
+
+- `rewoo-summarizer/`
+
+Contenido principal:
+
+- `rewoo-summarizer/rewoo_pipeline.py`
+- `rewoo-summarizer/smoke_test_rewoo.py`
+- `rewoo-summarizer/.env.example`
+- `rewoo-summarizer/requirements-rewoo.txt`
+
+Instalacion:
+
+```bash
+cd rewoo-summarizer
+python3 -m venv .venv
+source .venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements-rewoo.txt
+```
+
+Configuracion:
+
+1. Copia `rewoo-summarizer/.env.example` a `rewoo-summarizer/.env`.
+2. Completa al menos `SERPER_API_KEY`.
+
+Ejecucion:
+
+```bash
+cd rewoo-summarizer
+source .venv/bin/activate
+python rewoo_pipeline.py --task "Summarize the novella The Metamorphosis"
+```
+
+Prueba rapida (smoke test):
+
+```bash
+cd rewoo-summarizer
+source .venv/bin/activate
+python smoke_test_rewoo.py
+```
+
+Tecnologias usadas en esta implementacion:
+
+- IBM Granite Instruct (via `transformers`)
+- Serper.dev para recuperacion web
+- arquitectura ReWOO modular (planner/expert/final_summarizer/solver)
+
 ### Implementacion incluida en este repositorio
 
 Se agrego una implementacion ejecutable en:
