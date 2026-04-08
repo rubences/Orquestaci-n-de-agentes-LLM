@@ -1,0 +1,6 @@
+langgraph>=0.2.30
+langchain-ibm>=0.3.0
+langchain-core>=0.3.0
+pandas>=2.2.0
+python-dotenv>=1.0.1
+ibm-cos-sdk>=2.14.0

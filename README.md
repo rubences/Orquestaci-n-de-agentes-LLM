@@ -6,6 +6,7 @@ con LangChain + FAISS + IBM watsonx Granite.
 Referencia del tutorial base:
 <https://www.ibm.com/es-es/think/tutorials/llm-agent-orchestration-with-langchain-and-granite#228874318>
 
+Referencia adicional (LangGraph y futuro de agentes IA):
 <https://medium.com/@jddam/gu%C3%ADa-completa-langgraph-y-el-futuro-de-los-agentes-de-ia-en-2025-2f34ceaa456f>
 
 ## Archivos principales
@@ -330,6 +331,137 @@ Guia rapida de seleccion:
 - Coordina agentes especializados mediante handoffs.
 - Favorece transiciones fluidas entre agentes por tarea.
 - Buen ajuste para arquitecturas ligeras y modulares.
+
+### Tabla comparativa de marcos (enfoque empresarial)
+
+| Marco | Facilidad de inicio | Control de orquestacion | Observabilidad | Coste operativo estimado | Mejor para |
+| --- | --- | --- | --- | --- | --- |
+| IBM Bee Agent Framework | Media | Alto | Alto | Medio | Sistemas multiagente modulares con foco productivo |
+| LangChain Agents | Alta | Medio-Alto | Medio | Medio | Integraciones rapidas y flujos con herramientas heterogeneas |
+| OpenAI Swarm | Alta | Medio | Medio | Medio-Alto | Handoffs entre agentes especializados y arquitecturas ligeras |
+| crewAI | Alta | Alto (secuencial/paralelo por tareas) | Medio-Alto | Medio | Equipos por roles y automatizacion de procesos de negocio |
+
+Criterio practico de eleccion:
+
+- Si priorizas rapidez de prototipado: LangChain Agents o crewAI.
+- Si priorizas control modular de nivel productivo: Bee Agent Framework.
+- Si priorizas handoffs simples entre agentes: OpenAI Swarm.
+
+## Uso de LangGraph para crear agentes ReAct
+
+LangGraph permite construir agentes ReAct con un grafo de ejecucion ciclico.
+En su forma basica, el flujo incluye:
+
+1. Nodo de modelo (razona y decide accion).
+2. Nodo de herramientas (ejecuta la accion solicitada).
+
+En escenarios mas complejos se agrega un nodo adicional de salida estructurada.
+El estado del grafo funciona como memoria de trabajo para preservar contexto
+entre iteraciones del agente.
+
+Referencia recomendada:
+<https://medium.com/@jddam/gu%C3%ADa-completa-langgraph-y-el-futuro-de-los-agentes-de-ia-en-2025-2f34ceaa456f>
+
+### Requisitos previos
+
+- Cuenta de IBM Cloud con acceso a watsonx.ai.
+- Python 3.10+ (ideal 3.11 para ciertos entornos con Poetry).
+- Credenciales de watsonx.ai y, si aplica, un `space_id` de despliegue.
+
+### Flujo de implementacion recomendado
+
+- Generar credenciales en watsonx.ai: `watsonx_apikey`, `watsonx_url`, `space_id`.
+
+- Preparar entorno local:
+
+```bash
+git clone git@github.com:IBM/ibmdotcom-tutorials.git
+cd react-agent-langgraph-it-support/base/langgraph-react-agent/
+pipx install --python 3.11 poetry
+source $(poetry -q env use 3.11 && poetry env info --path)/bin/activate
+poetry install
+export PYTHONPATH=$(pwd):${PYTHONPATH}
+```
+
+- Completar `config.toml` con credenciales y modelo (`model_id`).
+
+- Conectar fuente de datos (por ejemplo IBM Cloud Object Storage) para lectura/escritura de tickets.
+
+- Crear herramientas con `@tool` (ejemplos tipicos: `find_tickets`, `create_ticket`, `get_todays_date`).
+
+- Registrar herramientas y construir el agente con `create_react_agent` usando un modelo compatible con tool calling.
+
+- Ejecutar y probar por una de estas vias: localmente, desplegado en watsonx.ai (chat preview), o desde scripts de despliegue/consulta en IDE.
+
+### Buenas practicas
+
+- Mantener prompts de sistema orientados a tareas y validacion de parametros.
+- Exponer trazas de tool calling para depuracion.
+- Versionar herramientas y contratos de entrada/salida.
+- Usar estado persistente para continuidad de conversaciones largas.
+
+### Implementacion incluida en este repositorio
+
+Se agrego una implementacion ejecutable en:
+
+- `langgraph-react-it-support/`
+
+Contenido principal:
+
+- `langgraph-react-it-support/chat_react_agent.py`
+- `langgraph-react-it-support/src/langgraph_react_agent/agent.py`
+- `langgraph-react-it-support/src/langgraph_react_agent/tools.py`
+- `langgraph-react-it-support/data/tickets.csv`
+
+Instalacion:
+
+```bash
+cd langgraph-react-it-support
+python3 -m venv .venv
+source .venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements-langgraph.txt
+```
+
+Configuracion:
+
+1. Copia `langgraph-react-it-support/.env.example` a `langgraph-react-it-support/.env`.
+2. Completa `WATSONX_APIKEY`, `WATSONX_PROJECT_ID` y `WATSONX_URL`.
+
+Opcional (backend en IBM Cloud Object Storage en lugar de CSV local):
+
+- `LANGGRAPH_USE_COS=true`
+- `COS_ENDPOINT`
+- `COS_INSTANCE_CRN`
+- `COS_BUCKET_NAME`
+- `COS_CSV_FILE_NAME` (por defecto `tickets.csv`)
+
+Ejecucion:
+
+```bash
+cd langgraph-react-it-support
+source .venv/bin/activate
+python chat_react_agent.py
+```
+
+Prueba rapida no interactiva (smoke test):
+
+```bash
+cd langgraph-react-it-support
+source .venv/bin/activate
+python smoke_test.py
+```
+
+Consultas de prueba:
+
+- "List all current tickets"
+- "Create a ticket for email outage with high urgency"
+- "What is today's date?"
+
+Notas de backend de datos:
+
+- Si `LANGGRAPH_USE_COS=false`, los tickets se guardan en `LANGGRAPH_TICKETS_FILE` (CSV local).
+- Si `LANGGRAPH_USE_COS=true`, las herramientas leen/escriben en el bucket COS configurado.
 
 ## Soluciones empresariales: watsonx Orchestrate
 
