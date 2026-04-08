@@ -589,6 +589,122 @@ python beeai_chat_client.py
 - `OPENROUTER_MODEL` se recomienda en `openrouter/auto` para evitar errores por modelos no disponibles.
 - Si OpenRouter falla, el servidor devuelve fallback basado en herramientas.
 
+## Que es MCP
+
+Tanto en empresas como en startups, cada vez se construyen mas soluciones con IA generativa.
+Para que sean utiles en produccion, los modelos necesitan contexto actualizado y acceso a
+herramientas, APIs, SDKs y sistemas front-end.
+
+MCP (Model Context Protocol) estandariza como se comparte ese contexto entre modelos y
+sistemas externos. Una analogia util es pensar en MCP como un puerto USB-C para LLMs:
+permite conectar capacidades externas de forma uniforme y reutilizable.
+
+MCP fue propuesto por Anthropic y adoptado por gran parte del ecosistema (incluyendo
+proveedores principales de IA e IDEs como VS Code y Cursor). Al ser un estandar abierto,
+sirve de puente entre el comportamiento probabilistico de los LLMs y los sistemas
+deterministas de negocio.
+
+Ventajas de MCP frente a otros patrones (RAG, tool calling ad-hoc, etc.):
+
+- Escala: un servidor MCP se define una vez y puede ser reutilizado por muchos clientes.
+- Recuperacion dinamica: evita pipelines de vectorizacion obligatoria para cada consulta.
+- Menor complejidad operativa: configuracion portable via archivos.
+- Independencia de plataforma/modelo: no acopla tu app a un proveedor concreto.
+- Depuracion clara cliente/servidor: contratos explicitos y mensajes JSON-RPC.
+
+Notas de protocolo:
+
+- MCP usa JSON-RPC para codificar mensajes.
+- Soporta transportes como `stdio` y HTTP streamable.
+- En iteraciones previas tambien se utilizo SSE.
+
+## Tutorial MCP: servidor basico de busqueda de tutoriales IBM
+
+Se agrego un tutorial practico en:
+
+- `ibmtutorialmcpserver/server.py`
+- `ibmtutorialmcpserver/requirements.txt`
+
+Objetivo del servidor:
+
+1. Descargar un indice JSON publico de tutoriales IBM.
+2. Buscar por termino en titulo/URL.
+3. Devolver resultados formateados con enlace, fecha y autor.
+
+### Paso 1. Configura el entorno
+
+Requisitos:
+
+- Python 3.11 o superior.
+- `venv` disponible.
+
+Comandos:
+
+```bash
+mkdir -p ibmtutorialmcpserver
+cd ibmtutorialmcpserver
+python3 -m venv venv
+source venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+Verificacion opcional:
+
+```bash
+fastmcp version
+```
+
+### Paso 2. Ejecuta el servidor MCP
+
+```bash
+cd ibmtutorialmcpserver
+source venv/bin/activate
+fastmcp run server.py
+```
+
+### Paso 3. Conecta el servidor MCP a tu IDE
+
+Cursor (`mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "tutorials": {
+      "command": "fastmcp",
+      "args": ["run", "<YOUR_PATH>/ibmtutorialmcpserver/server.py"],
+      "env": {}
+    }
+  }
+}
+```
+
+VS Code (`.vscode/mcp.json`):
+
+```json
+{
+  "servers": {
+    "IBM Tutorials": {
+      "type": "stdio",
+      "command": "fastmcp",
+      "args": [
+        "run",
+        "<YOUR_PATH>/ibmtutorialmcpserver/server.py"
+      ]
+    }
+  }
+}
+```
+
+### Paso 4. Uso en chat del IDE
+
+Ejemplo de prompt:
+
+- "Cuales son algunos tutoriales de series temporales de IBM?"
+
+Si el cliente MCP queda bien conectado, el asistente podra invocar la herramienta
+`search_ibmtutorials` y responder con tutoriales relevantes.
+
 ### Implementacion incluida en este repositorio
 
 Se agrego una implementacion ejecutable en:
