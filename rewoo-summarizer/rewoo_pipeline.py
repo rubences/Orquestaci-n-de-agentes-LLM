@@ -16,6 +16,9 @@ class ReWOOConfig:
     num_results: int
     max_expert_loops: int
     max_summary_loops: int
+    expert_max_new_tokens: int
+    summary_max_new_tokens: int
+    summary_do_sample: bool
 
 
 def load_config() -> ReWOOConfig:
@@ -23,9 +26,17 @@ def load_config() -> ReWOOConfig:
 
     model_id = os.getenv("REWOO_MODEL_ID", "ibm-granite/granite-3.2-2b-instruct")
     serper_api_key = os.getenv("SERPER_API_KEY", "")
-    num_results = int(os.getenv("REWOO_NUM_RESULTS", "3"))
-    max_expert_loops = int(os.getenv("REWOO_MAX_EXPERT_LOOPS", "5"))
-    max_summary_loops = int(os.getenv("REWOO_MAX_SUMMARY_LOOPS", "5"))
+    num_results = int(os.getenv("REWOO_NUM_RESULTS", "2"))
+    max_expert_loops = int(os.getenv("REWOO_MAX_EXPERT_LOOPS", "2"))
+    max_summary_loops = int(os.getenv("REWOO_MAX_SUMMARY_LOOPS", "2"))
+    expert_max_new_tokens = int(os.getenv("REWOO_EXPERT_MAX_NEW_TOKENS", "80"))
+    summary_max_new_tokens = int(os.getenv("REWOO_SUMMARY_MAX_NEW_TOKENS", "80"))
+    summary_do_sample = os.getenv("REWOO_SUMMARY_DO_SAMPLE", "false").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
 
     if not serper_api_key:
         raise ValueError("Missing SERPER_API_KEY. Set it in environment or .env file.")
@@ -36,6 +47,9 @@ def load_config() -> ReWOOConfig:
         num_results=num_results,
         max_expert_loops=max_expert_loops,
         max_summary_loops=max_summary_loops,
+        expert_max_new_tokens=expert_max_new_tokens,
+        summary_max_new_tokens=summary_max_new_tokens,
+        summary_do_sample=summary_do_sample,
     )
 
 
@@ -82,7 +96,7 @@ Answer:"""
         for _ in range(self.config.max_expert_loops):
             outputs = self.generator(
                 input_prompt,
-                max_new_tokens=120,
+                max_new_tokens=self.config.expert_max_new_tokens,
                 do_sample=False,
                 eos_token_id=self.tokenizer.eos_token_id,
             )
@@ -96,7 +110,7 @@ Answer:"""
             input_prompt = prompt + generated_text
             last_generated = new_text
 
-            if new_text.endswith((".", "!", "?")) and len(generated_text.split()) > 50:
+            if new_text.endswith((".", "!", "?")) and len(generated_text.split()) > 30:
                 break
 
         return generated_text.strip()
@@ -124,15 +138,14 @@ Summary:"""
 
         summary = ""
         current_prompt = base_prompt
-        max_total_tokens = 400
+        max_total_tokens = 220
         total_tokens_used = 0
 
         for _ in range(self.config.max_summary_loops):
             response = self.generator(
                 current_prompt,
-                max_new_tokens=100,
-                do_sample=True,
-                top_p=0.9,
+                max_new_tokens=self.config.summary_max_new_tokens,
+                do_sample=self.config.summary_do_sample,
                 eos_token_id=self.tokenizer.eos_token_id,
             )
             chunk = response[0]["generated_text"][len(current_prompt):].strip()
@@ -167,7 +180,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="ReWOO summarization pipeline with IBM Granite + Serper")
     parser.add_argument(
         "--task",
-        default="Summarize the novella The Metamorphosis",
+        default="Summarize The Metamorphosis in 3 bullet points",
         help="High-level task to solve with ReWOO",
     )
     return parser

@@ -452,7 +452,7 @@ Prueba rapida (smoke test):
 ```bash
 cd rewoo-summarizer
 source .venv/bin/activate
-python smoke_test_rewoo.py
+python smoke_test_rewoo.py --quick-test
 ```
 
 Tecnologias usadas en esta implementacion:
@@ -460,6 +460,75 @@ Tecnologias usadas en esta implementacion:
 - IBM Granite Instruct (via `transformers`)
 - Serper.dev para recuperacion web
 - arquitectura ReWOO modular (planner/expert/final_summarizer/solver)
+
+Optimizaciones aplicadas para pruebas rapidas:
+
+- Menos loops por defecto (`REWOO_MAX_EXPERT_LOOPS=2`, `REWOO_MAX_SUMMARY_LOOPS=2`).
+- Menos tokens por defecto (`REWOO_EXPERT_MAX_NEW_TOKENS=80`, `REWOO_SUMMARY_MAX_NEW_TOKENS=80`).
+- Sampling desactivado en el resumen (`REWOO_SUMMARY_DO_SAMPLE=false`).
+- `smoke_test_rewoo.py --quick-test` fuerza configuracion aun mas ligera.
+
+## ACP e interoperabilidad entre agentes (demo practica)
+
+Se agrego una demo funcional de comunicacion estandarizada entre agentes
+con mensajes JSON estilo ACP en:
+
+- `acp_tutorial/`
+
+Componentes:
+
+- `acp_tutorial/acp_client.py` (cliente/orquestador)
+- `acp_tutorial/acp_crew.py` (servidor estilo crewAI en puerto 8000)
+- `acp_tutorial/artist_repertoire_agent.py` (servidor estilo BeeAI en puerto 9000)
+
+Esta demo muestra el flujo:
+
+1. El cliente envia una URL.
+2. El servidor crew genera una cancion a partir del tema.
+3. El servidor BeeAI (OpenRouter) devuelve critica A&R.
+4. El servidor crew genera informe Markdown final.
+5. Se guarda `a&r_feedback.md` y `acp_trace.json`.
+
+### Instalacion ACP
+
+```bash
+cd acp_tutorial
+python3 -m venv .venv
+source .venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements-acp.txt
+```
+
+### Configuracion ACP
+
+1. Copia `acp_tutorial/.env.example` a `acp_tutorial/.env`.
+2. Completa `OPENROUTER_API_KEY`.
+
+### Ejecucion ACP (3 terminales)
+
+Terminal 1:
+
+```bash
+cd acp_tutorial
+source .venv/bin/activate
+python acp_crew.py
+```
+
+Terminal 2:
+
+```bash
+cd acp_tutorial
+source .venv/bin/activate
+python artist_repertoire_agent.py
+```
+
+Terminal 3:
+
+```bash
+cd acp_tutorial
+source .venv/bin/activate
+python acp_client.py
+```
 
 ### Implementacion incluida en este repositorio
 
