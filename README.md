@@ -98,3 +98,76 @@ El script genera un CSV con columnas:
 - `Action Input`
 - `Observation`
 - `Final Answer`
+
+## Llamada a herramientas con Ollama (local)
+
+La llamada a herramientas en LLM permite que el modelo use funciones externas para resolver
+tareas que van mas alla de su contexto interno: consultar datos en tiempo real, ejecutar
+calculos, o inspeccionar archivos locales.
+
+En este proyecto se incluye un flujo local con Ollama para buscar informacion en archivos
+de texto/PDF e imagenes dentro de una carpeta del sistema de archivos. Esto es util cuando
+quieres privacidad y ejecucion local sin depender de APIs remotas.
+
+Script incluido:
+
+- `ollama_tool_calling_local_fs.py`
+
+### Que hace este script
+
+1. Define dos herramientas: `Search inside text files` para `.txt` y `.pdf`, y `Search inside image files` para imagenes.
+
+2. Registra las herramientas para que Ollama pueda invocarlas via `tools`.
+
+3. Procesa los `tool_calls` devueltos por el modelo.
+
+4. Genera respuesta final devolviendo archivos encontrados.
+
+### Requisitos para esta parte
+
+Instalar Ollama desde:
+<https://ollama.com/download>
+
+Comprobar instalacion:
+
+```bash
+ollama -v
+```
+
+Instalar librerias Python:
+
+```bash
+pip install ollama pymupdf
+```
+
+Descargar modelos:
+
+```bash
+ollama pull granite3.2:8b
+ollama pull granite3.2-vision
+```
+
+### Estructura esperada
+
+Coloca tus archivos en una carpeta local, por ejemplo `./files`:
+
+- `.txt`
+- `.pdf`
+- `.jpg`, `.jpeg`, `.png`
+
+### Ejecucion Ollama local
+
+Modo interactivo:
+
+```bash
+python ollama_tool_calling_local_fs.py --files-dir ./files --start-ollama
+```
+
+Modo no interactivo:
+
+```bash
+python ollama_tool_calling_local_fs.py --files-dir ./files --query "informacion sobre perros" --start-ollama
+```
+
+Referencia conceptual del tutorial original (IBM):
+<https://www.ibm.com/es-es/think/tutorials/llm-agent-orchestration-with-langchain-and-granite>
