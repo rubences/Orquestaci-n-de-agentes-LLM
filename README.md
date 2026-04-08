@@ -6,6 +6,8 @@ con LangChain + FAISS + IBM watsonx Granite.
 Referencia del tutorial base:
 <https://www.ibm.com/es-es/think/tutorials/llm-agent-orchestration-with-langchain-and-granite#228874318>
 
+https://medium.com/@jddam/gu%C3%ADa-completa-langgraph-y-el-futuro-de-los-agentes-de-ia-en-2025-2f34ceaa456f
+
 ## Archivos principales
 
 - `llm_agent_orchestration.ipynb`: Notebook paso a paso.
@@ -241,3 +243,98 @@ Resultado esperado:
 1. Cambia roles u objetivos en `src/customer_service_analyzer/config/agents.yaml`.
 2. Ajusta descripciones de tareas en `src/customer_service_analyzer/config/tasks.yaml`.
 3. Agrega herramientas en `src/customer_service_analyzer/tools/custom_tool.py`.
+
+## Varias estrategias de colaboracion multiagente
+
+Los agentes pueden coordinarse de distintas formas segun el tipo de problema,
+el nivel de incertidumbre y los requisitos de control.
+
+### 1. Colaboracion basada en reglas
+
+- Se basa en reglas explicitas (por ejemplo, logica if-then, maquinas de estado o reglas declarativas).
+- Prioriza consistencia, trazabilidad y control del comportamiento.
+- Es ideal para procesos estructurados y de baja variabilidad.
+
+Ventajas:
+
+- Alta previsibilidad y eficiencia operativa.
+- Facil auditoria de decisiones.
+
+Desventajas:
+
+- Baja adaptabilidad ante escenarios nuevos.
+- Escalado complejo cuando crecen casos excepcionales.
+
+### 2. Colaboracion basada en roles
+
+- Cada agente tiene responsabilidades especializadas (analista, evaluador, generador de reporte, etc.).
+- Los agentes colaboran compartiendo contexto y resultados intermedios.
+- Permite descomponer tareas complejas en subproblemas expertos.
+
+Ventajas:
+
+- Modularidad y reutilizacion de componentes.
+- Mejor separacion de responsabilidades.
+
+Desventajas:
+
+- Dependencia de una buena integracion/orquestacion.
+- Posibles cuellos de botella entre etapas.
+
+### 3. Colaboracion basada en modelos
+
+- Los agentes usan modelos internos del entorno, de otros agentes y del objetivo comun.
+- Se apoyan en inferencia probabilistica y/o aprendizaje para decidir bajo incertidumbre.
+- Es util cuando el contexto cambia o es parcialmente observable.
+
+Ventajas:
+
+- Alta flexibilidad y decisiones mas contextuales.
+- Mejor respuesta a escenarios dinamicos.
+
+Desventajas:
+
+- Mayor complejidad de diseño y validacion.
+- Coste computacional superior.
+
+## Marcos de referencia
+
+1. IBM Bee Agent Framework
+
+- Enfoque modular para construir procesos multiagente escalables.
+- Incluye componentes para herramientas, memoria y monitoreo.
+- Destaca por capacidades orientadas a produccion y extensibilidad.
+
+1. LangChain Agents
+
+- Facilita agentes con uso dinamico de herramientas.
+- Permite flujos de razonamiento de varios pasos y toma de decisiones contextual.
+- Amplio ecosistema de integraciones.
+
+1. OpenAI Swarm
+
+- Coordina agentes especializados mediante handoffs.
+- Favorece transiciones fluidas entre agentes por tarea.
+- Buen ajuste para arquitecturas ligeras y modulares.
+
+## Soluciones empresariales: watsonx Orchestrate
+
+En escenarios empresariales, watsonx Orchestrate permite combinar:
+
+- registro de habilidades/agentes,
+- analisis de intencion,
+- orquestacion de flujo (secuencias, ramas, reintentos, paralelo),
+- memoria/contexto compartido,
+- asistencia LLM,
+- supervision humana en el ciclo.
+
+Este modelo ayuda a operar flujos complejos de extremo a extremo con control,
+trazabilidad y colaboracion entre agentes y personas.
+
+## Predicciones futuras
+
+- Emergera inteligencia colectiva mas robusta en equipos de agentes.
+- La calidad del sistema se medira por precision, relevancia, eficiencia,
+  explicabilidad y coherencia global.
+- La orquestacion multiagente permitira mayor automatizacion en problemas
+  multidimensionales y flujos de varios pasos.
