@@ -6,7 +6,7 @@ con LangChain + FAISS + IBM watsonx Granite.
 Referencia del tutorial base:
 <https://www.ibm.com/es-es/think/tutorials/llm-agent-orchestration-with-langchain-and-granite#228874318>
 
-https://medium.com/@jddam/gu%C3%ADa-completa-langgraph-y-el-futuro-de-los-agentes-de-ia-en-2025-2f34ceaa456f
+<https://medium.com/@jddam/gu%C3%ADa-completa-langgraph-y-el-futuro-de-los-agentes-de-ia-en-2025-2f34ceaa456f>
 
 ## Archivos principales
 
@@ -296,6 +296,20 @@ Desventajas:
 
 - Mayor complejidad de diseño y validacion.
 - Coste computacional superior.
+
+### Tabla comparativa de estrategias
+
+| Estrategia | Como funciona | Casos de uso ideales | Complejidad | Coste computacional | Ventaja principal | Riesgo principal |
+| --- | --- | --- | --- | --- | --- | --- |
+| Basada en reglas | Reglas explicitas (if-then, estados, logica fija) | Procesos estables, compliance, flujos repetitivos | Baja | Bajo | Consistencia y control | Poca adaptabilidad |
+| Basada en roles | Agentes especializados por responsabilidad y contexto compartido | Pipelines modulares, tareas por expertos, analisis por etapas | Media | Medio | Modularidad y especializacion | Dependencia de integracion |
+| Basada en modelos | Agentes con modelos internos e inferencia bajo incertidumbre | Entornos dinamicos, informacion incompleta, planificacion adaptativa | Alta | Alto | Flexibilidad contextual | Mayor complejidad tecnica |
+
+Guia rapida de seleccion:
+
+- Si priorizas control y trazabilidad: colaboracion basada en reglas.
+- Si priorizas productividad por especializacion: colaboracion basada en roles.
+- Si priorizas adaptacion en incertidumbre: colaboracion basada en modelos.
 
 ## Marcos de referencia
 
