@@ -171,3 +171,73 @@ python ollama_tool_calling_local_fs.py --files-dir ./files --query "informacion 
 
 Referencia conceptual del tutorial original (IBM):
 <https://www.ibm.com/es-es/think/tutorials/llm-agent-orchestration-with-langchain-and-granite>
+
+## Resolucion de problemas con sistemas multiagente (crewAI)
+
+Se agrego un ejemplo completo de colaboracion multiagente para analisis de
+transcripciones de call center con tres roles:
+
+1. `Transcript Analyzer`
+2. `Quality Assurance Specialist`
+3. `Report Generator`
+
+La implementacion vive en:
+
+- `multiagent-collab-cs-call-center-analysis/`
+
+### Estructura
+
+```text
+multiagent-collab-cs-call-center-analysis/
+├── data/
+│   └── transcript.txt
+├── main.py
+├── requirements-crewai.txt
+└── src/customer_service_analyzer/
+  ├── __init__.py
+  ├── crew.py
+  ├── config/
+  │   ├── agents.yaml
+  │   └── tasks.yaml
+  └── tools/
+    ├── custom_tool.py
+    └── tool_helper.py
+```
+
+### Paso 1. Configura el entorno
+
+```bash
+cd multiagent-collab-cs-call-center-analysis
+python3 -m venv .venv
+source .venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements-crewai.txt
+```
+
+### Paso 2. Credenciales
+
+Define estas variables en tu `.env` (o exportalas en la shell):
+
+- `WATSONX_APIKEY`
+- `WATSONX_PROJECT_ID`
+- `WATSONX_URL` (por ejemplo `https://us-south.ml.cloud.ibm.com`)
+- `SERPER_API_KEY`
+- `CREWAI_MODEL` (opcional, por defecto: `watsonx/ibm/granite-3-8b-instruct`)
+
+### Paso 3. Ejecuta el sistema
+
+```bash
+python main.py
+```
+
+Resultado esperado:
+
+1. El crew ejecuta tareas secuenciales (`transcript_analysis` -> `quality_evaluation` -> `report_generation`).
+2. Se imprime el resultado final en consola.
+3. Se genera `report.md` con el informe consolidado.
+
+### Personalizacion rapida
+
+1. Cambia roles u objetivos en `src/customer_service_analyzer/config/agents.yaml`.
+2. Ajusta descripciones de tareas en `src/customer_service_analyzer/config/tasks.yaml`.
+3. Agrega herramientas en `src/customer_service_analyzer/tools/custom_tool.py`.

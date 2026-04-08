@@ -1,0 +1,33 @@
+transcript_analysis:
+  description: >
+    Analyze the call transcript and extract key insights, main themes,
+    sentiment signals, and escalation indicators from {transcript}.
+    Use text analysis, keyword extraction, and sentiment tools.
+  expected_output: >
+    Detailed transcript analysis with themes, sentiment, keywords,
+    and escalation-risk notes.
+  agent: transcript_analyzer
+
+quality_evaluation:
+  description: >
+    Evaluate service quality using transcript analysis context and
+    call center standards. Score interaction quality and identify risks.
+    Add improvement recommendations and quality metrics interpretation.
+  expected_output: >
+    Quality evaluation report with scoring, risk level,
+    and clear recommendations.
+  agent: quality_assurance_specialist
+  context:
+    - transcript_analysis
+
+report_generation:
+  description: >
+    Generate a final report that combines transcript analysis and
+    quality evaluation into labeled sections, summary, and action plan.
+  expected_output: >
+    Comprehensive, readable report for call center managers with
+    findings and prioritized actions.
+  agent: report_generator
+  context:
+    - transcript_analysis
+    - quality_evaluation
