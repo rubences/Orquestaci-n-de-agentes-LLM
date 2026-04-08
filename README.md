@@ -530,6 +530,65 @@ source .venv/bin/activate
 python acp_client.py
 ```
 
+## A2A e interoperabilidad cliente-agente (demo practica)
+
+Se agrego una demo A2A (Agent2Agent) compatible con:
+
+- AgentCard en `/.well-known/agent-card.json`
+- Mensajeria JSON-RPC 2.0 en `POST /`
+- Streaming SSE en `GET /stream`
+
+Ubicacion:
+
+- `a2a_tutorial/`
+
+Componentes:
+
+- `a2a_tutorial/beeai-a2a-server/beeai_chat_server.py`
+- `a2a_tutorial/beeai-a2a-client/beeai_chat_client.py`
+
+Herramientas del agente (RequirementAgent estilo BeeAI):
+
+- ThinkTool (razonamiento estructurado)
+- DuckDuckGoSearchTool (busqueda web)
+- OpenMeteoTool (clima)
+- WikipediaTool (resumen enciclopedico)
+
+El servidor tambien puede enriquecer la respuesta con OpenRouter cuando hay clave API.
+
+### Instalacion A2A (2 terminales)
+
+Terminal servidor:
+
+```bash
+cd a2a_tutorial/beeai-a2a-server
+python3 -m venv .venv
+source .venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
+python beeai_chat_server.py
+```
+
+Terminal cliente:
+
+```bash
+cd a2a_tutorial/beeai-a2a-client
+python3 -m venv .venv
+source .venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
+python beeai_chat_client.py
+```
+
+### Probar AgentCard
+
+- `http://127.0.0.1:9999/.well-known/agent-card.json`
+
+### Notas OpenRouter
+
+- `OPENROUTER_MODEL` se recomienda en `openrouter/auto` para evitar errores por modelos no disponibles.
+- Si OpenRouter falla, el servidor devuelve fallback basado en herramientas.
+
 ### Implementacion incluida en este repositorio
 
 Se agrego una implementacion ejecutable en:

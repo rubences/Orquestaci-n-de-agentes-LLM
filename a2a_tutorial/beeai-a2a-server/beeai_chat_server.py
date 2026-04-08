@@ -19,7 +19,7 @@ BASE_URL = os.getenv("BEEAI_AGENT_URL", f"http://127.0.0.1:{APP_PORT}")
 
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
 OPENROUTER_BASE_URL = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
-OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "deepseek/deepseek-r1-distill-llama-70b:free")
+OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "openrouter/auto")
 
 app = FastAPI(title="BeeAI A2A Chat Server", version="1.0.0")
 
@@ -144,7 +144,7 @@ def llm_summarize(user_text: str, tool_outputs: dict[str, str]) -> str:
         "Final answer:"
     )
 
-    try:
+    def _call_openrouter(model_name: str) -> str:
         resp = requests.post(
             f"{OPENROUTER_BASE_URL}/chat/completions",
             headers={
@@ -152,7 +152,7 @@ def llm_summarize(user_text: str, tool_outputs: dict[str, str]) -> str:
                 "Content-Type": "application/json",
             },
             json={
-                "model": OPENROUTER_MODEL,
+                "model": model_name,
                 "messages": [{"role": "user", "content": prompt}],
                 "temperature": 0.2,
             },
@@ -161,8 +161,14 @@ def llm_summarize(user_text: str, tool_outputs: dict[str, str]) -> str:
         resp.raise_for_status()
         data = resp.json()
         return data["choices"][0]["message"]["content"].strip()
-    except Exception as exc:
-        return f"OpenRouter error, fallback to tool outputs. Details: {exc}\n\n{context[:2500]}"
+
+    try:
+        return _call_openrouter(OPENROUTER_MODEL)
+    except Exception:
+        try:
+            return _call_openrouter("openrouter/auto")
+        except Exception as exc:
+            return f"OpenRouter error, fallback to tool outputs. Details: {exc}\n\n{context[:2500]}"
 
 
 def extract_user_text(payload: dict[str, Any]) -> str:
